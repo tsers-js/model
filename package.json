@@ -1,0 +1,49 @@
+{
+  "name": "@tsers/model",
+  "version": "1.0.0",
+  "private": false,
+  "description": "TSERSful Model interpreter",
+  "main": "dist/tsers.http.js",
+  "author": "Matti Lankinen <m.lankinen@iki.fi> (https://github.com/milankinen)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tsers-js/model.git"
+  },
+  "keywords": [
+    "rxjs",
+    "reactive",
+    "tsers",
+    "interpreter",
+    "model",
+    "state",
+    "lenses"
+  ],
+  "scripts": {
+    "prepublish": "npm test && npm run dist",
+    "test": "npm run lint && npm run mocha:all",
+    "lint": "eslint src test",
+    "mocha:all": "npm run mocha -- --recursive test",
+    "mocha": "mocha --compilers js:babel-register -s 500",
+    "dist": "npm run build && npm run minify",
+    "build": "mkdir -p dist && rm -f dist/* && babel src/index.js > dist/tsers.model.js",
+    "minify": "uglifyjs -c -m -- dist/tsers.model.js > dist/tsers.model.min.js"
+  },
+  "peerDependencies": {
+    "@tsers/core": "1.x",
+    "rx": "4.x"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.6.5",
+    "babel-eslint": "^5.0.0",
+    "babel-plugin-transform-es2015-modules-umd": "^6.6.5",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-stage-2": "^6.5.0",
+    "babel-register": "^6.6.5",
+    "eslint": "2.2.0",
+    "mocha": "^2.4.5",
+    "rx": "^4.1.0",
+    "should": "^8.2.2",
+    "uglify-js": "^2.6.2"
+  }
+}
