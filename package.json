@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "description": "TSERSful Model interpreter",
-  "main": "dist/tsers.http.js",
+  "main": "dist/tsers.model.js",
   "author": "Matti Lankinen <m.lankinen@iki.fi> (https://github.com/milankinen)",
   "license": "MIT",
   "repository": {
@@ -30,7 +30,6 @@
     "minify": "uglifyjs -c -m -- dist/tsers.model.js > dist/tsers.model.min.js"
   },
   "peerDependencies": {
-    "@tsers/core": "1.x",
     "rx": "4.x"
   },
   "devDependencies": {
@@ -45,5 +44,9 @@
     "rx": "^4.1.0",
     "should": "^8.2.2",
     "uglify-js": "^2.6.2"
+  },
+  "dependencies": {
+    "partial.lenses": "^1.4.1",
+    "ramda": "^0.19.1"
   }
 }
