@@ -51,9 +51,11 @@ export default function makeModel(initial, opts = {}) {
       const mapListBy = (identity, iterator) =>
         listBy(identity, state$, (ident) => iterator(ident, lens(L.find(it => identity(it) === ident))))
 
+      const log = (prefix = "") =>
+        model(state$.do(x => info(prefix, x)).shareReplay(1), stateLens)
 
       return extend(state$, {
-        lens, mod, mapListBy,
+        lens, mod, log, mapListBy,
         set: val$ => mod(val$.map(R.always)),
         mapListById: iterator => mapListBy(it => it.id, iterator)
       })
