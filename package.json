@@ -33,6 +33,7 @@
     "rx": "4.x"
   },
   "devDependencies": {
+    "@tsers/core": "^1.0.0-rc2",
     "babel-cli": "^6.6.5",
     "babel-eslint": "^5.0.0",
     "babel-plugin-transform-es2015-modules-umd": "^6.6.5",
