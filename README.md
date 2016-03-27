@@ -143,7 +143,7 @@ function main(signals) {
 }
 ```
 
-#### `mapListBy :: ((item => ident), (ident, Model item) => Observable A) => Observable (Observable A)
+#### `mapListBy :: ((item => ident), (ident, Model item) => Observable A) => Observable (Observable A)`
 
 Same as `mapListById` but allows to define the identity function instead of using 
 `.id` property
