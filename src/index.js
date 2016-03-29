@@ -1,12 +1,12 @@
 import Rx, {Observable as O} from "rx"
 import R_ from "ramda"
-import L_ from "partial.lenses"
+import P, * as L_ from "partial.lenses"
 
 const extend = Object.assign
 
 export const R = R_
 
-export const L = L_
+export const L = extend(P, L_)
 
 export default function makeModel(initial, opts = {}) {
   const ID = {}
