@@ -55,7 +55,7 @@ export default function makeModel(initial, opts = {}) {
         model(state$.do(x => info(prefix, x)).shareReplay(1), stateLens)
 
       return extend(state$, {
-        lens, mod, log, mapListBy,
+        L, lens, mod, log, mapListBy,
         set: val$ => mod(val$.map(R.always)),
         mapListById: iterator => mapListBy(it => it.id, iterator)
       })
