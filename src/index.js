@@ -48,8 +48,17 @@ export default function makeModel(initial, opts = {}) {
       const mod = mod$ =>
         mod$.map(mod => ({mod: R.over(stateLens, mod), ID}))
 
-      const mapListBy = (identity, iterator) =>
-        listBy(identity, state$, (ident) => iterator(ident, lens(L.find(it => identity(it) === ident))))
+      const mapListBy = (identity, iterator) => {
+        const indexed$ = state$
+          .map(items => items.reduce((o, item) => (o[identity(item)] = item) && o, {}))
+          .shareReplay(1)
+        const iter = ident => {
+          const itemLens = L.find(it => identity(it) === ident)
+          const item$ = model(indexed$.map(s => s[ident]).distinctUntilChanged(), L(stateLens, itemLens))
+          return iterator(ident, item$)
+        }
+        return listBy(identity, state$, iter)
+      }
 
       const log = (prefix = "") =>
         model(state$.do(x => info(prefix, x)).shareReplay(1), stateLens)
