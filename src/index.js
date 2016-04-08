@@ -1,4 +1,3 @@
-import Rx, {Observable as O} from "rx"
 import R_ from "ramda"
 import P, * as L_ from "partial.lenses"
 
@@ -16,28 +15,28 @@ export default function makeModel(initial, opts = {}) {
     warn = (...args) => console.warn(...args)       // eslint-disable-line
     } = opts
 
-  return function Model({mapListBy: listBy}) {
+  return function Model({O, mapListBy: listBy}) {
     let obs = null, dispose = null
     let state$ = O.create(o => (obs = o) && (() => obs = null))
       .filter(m => (m && m.ID === ID) || (warn(
         "Received modification that was not created by using 'Model.mod' or 'Model.set'. Ignoring...", m
       ) && false))
-      .startWith(initial)
-      .scan((s, {mod}) => mod(s))
+      .scan((s, {mod}) => mod(s), initial)
 
     if (logging) {
-      state$ = state$.do(s => info("New state:", s))
+      state$ = state$.tap(s => info("New state:", s))
     }
 
-    state$ = state$.replay(null, 1)
-    dispose = state$.connect()
+    [state$, dispose] = state$.hot(true)
 
     const rootLens = R.lens(R.identity, R.nthArg(0))
     const M = model(shareReplayChanges(state$), rootLens)
-    const executor = output$ => new Rx.CompositeDisposable(
+    const executor = output$ => O.disposeToSubscription(O.disposeMany([
       dispose,
-      output$.subscribe(mod => obs && obs.onNext(mod))
-    )
+      new O(output$).subscribe({
+        next: mod => obs && obs.next(mod)
+      })
+    ]))
 
     return [M, executor]
 
@@ -46,24 +45,24 @@ export default function makeModel(initial, opts = {}) {
         model(shareReplayChanges(state$.map(L.view(L(l, ...ls)))), L(stateLens, l, ...ls))
 
       const mod = mod$ =>
-        mod$.map(mod => ({mod: R.over(stateLens, mod), ID}))
+        new O(mod$).map(mod => ({mod: R.over(stateLens, mod), ID})).get()
 
       const mapListBy = (identity, iterator) => {
         const indexed$ = state$
           .map(items => items.reduce((o, item) => (o[identity(item)] = item) && o, {}))
-          .shareReplay(1)
+          .toProperty()
         const iter = ident => {
           const itemLens = L.find(it => identity(it) === ident)
-          const item$ = model(indexed$.map(s => s[ident]).distinctUntilChanged(), L(stateLens, itemLens))
+          const item$ = model(indexed$.map(s => s[ident]).skipDuplicates(), L(stateLens, itemLens))
           return iterator(ident, item$)
         }
-        return listBy(identity, state$, iter)
+        return listBy(identity, state$.get(), iter)
       }
 
       const log = (prefix = "") =>
-        model(state$.do(x => info(prefix, x)).shareReplay(1), stateLens)
+        model(state$.tap(x => info(prefix, x)).toProperty(), stateLens)
 
-      return extend(state$, {
+      return extend(state$.get(), {
         L, lens, mod, log, mapListBy,
         set: val$ => mod(val$.map(R.always)),
         mapListById: iterator => mapListBy(it => it.id, iterator)
@@ -71,7 +70,7 @@ export default function makeModel(initial, opts = {}) {
     }
 
     function shareReplayChanges(val$) {
-      return val$.distinctUntilChanged().shareReplay(1)
+      return val$.skipDuplicates().toProperty()
     }
   }
 }
