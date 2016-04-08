@@ -1,10 +1,12 @@
 import "should"
-import {mapListBy} from "@tsers/core"
-import Rx, {Observable as O} from "rx"
+import {mapListBy as mlb} from "@tsers/core"
+import Rx, {Observable as O} from "@tsers/rx"
 import Model, {R} from "../src/index"
 
+const mapListBy = mlb(Rx.TSERS)
+
 function run(Model, main) {
-  const [Signals, executor] = Model({mapListBy})
+  const [Signals, executor] = Model({mapListBy, O: Rx.TSERS})
   const [out$, mod$] = main(Signals)
   setImmediate(() => executor(mod$))
   return out$
