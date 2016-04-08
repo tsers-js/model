@@ -33,9 +33,6 @@
     "partial.lenses": "^2.0.0",
     "ramda": "^0.20.0"
   },
-  "peerDependencies": {
-    "rx": "4.x"
-  },
   "devDependencies": {
     "@tsers/core": "2.0.0-alpha1",
     "@tsers/rx": "latest",
