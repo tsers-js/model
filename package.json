@@ -34,7 +34,7 @@
     "ramda": "^0.20.0"
   },
   "devDependencies": {
-    "@tsers/core": "2.0.0-alpha1",
+    "@tsers/core": "2.0.0-alpha2",
     "@tsers/rx": "latest",
     "babel-cli": "^6.6.5",
     "babel-eslint": "^6.0.0",
