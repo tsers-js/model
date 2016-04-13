@@ -30,7 +30,7 @@ export default function makeModel(initial, opts = {}) {
     [state$, dispose] = state$.hot(true)
 
     const rootLens = R.lens(R.identity, R.nthArg(0))
-    const M = model(shareReplayChanges(state$), rootLens)
+    const M = model(state$.skipDuplicates(), rootLens)
     const executor = output$ => O.disposeToSubscription(O.disposeMany([
       dispose,
       new O(output$).subscribe({
@@ -40,37 +40,30 @@ export default function makeModel(initial, opts = {}) {
 
     return [M, executor]
 
-    function model(state$, stateLens) {
+    function model(state$, stateLens, prop = true) {
       const lens = (l, ...ls) =>
-        model(shareReplayChanges(state$.map(L.view(L(l, ...ls)))), L(stateLens, l, ...ls))
+        model(state$.map(L.view(L(l, ...ls))).skipDuplicates(), L(stateLens, l, ...ls))
 
       const mod = mod$ =>
         new O(mod$).map(mod => ({mod: R.over(stateLens, mod), ID})).get()
 
       const mapListBy = (identity, iterator) => {
-        const indexed$ = state$
-          .map(items => items.reduce((o, item) => (o[identity(item)] = item) && o, {}))
-          .toProperty()
-        const iter = ident => {
+        const iter = (ident, item$) => {
           const itemLens = L.find(it => identity(it) === ident)
-          const item$ = model(indexed$.map(s => s[ident]).skipDuplicates(), L(stateLens, itemLens))
-          return iterator(ident, item$)
+          const it$ = model(new O(item$), L(stateLens, itemLens), false)
+          return iterator(ident, it$)
         }
-        return listBy(identity, state$.get(), iter)
+        return listBy(identity, state$.get(false), iter)
       }
 
       const log = (prefix = "") =>
-        model(state$.tap(x => info(prefix, x)).toProperty(), stateLens)
+        model(state$.tap(x => info(prefix, x)), stateLens)
 
-      return extend(state$.get(), {
+      return extend((prop ? state$.getp() : state$.get()), {
         L, lens, mod, log, mapListBy,
         set: val$ => mod(val$.map(R.always)),
         mapListById: iterator => mapListBy(it => it.id, iterator)
       })
-    }
-
-    function shareReplayChanges(val$) {
-      return val$.skipDuplicates().toProperty()
     }
   }
 }
